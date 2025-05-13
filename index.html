@@ -1,0 +1,238 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VP Smile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: beige;
+      font-family: 'Montserrat', sans-serif;
+      color: #333;
+    }
+    .page {
+      display: none;
+      padding: 2rem;
+      animation: fadeIn 0.5s ease-in-out forwards;
+    }
+    .active {
+      display: block;
+    }
+    .btn {
+      padding: 12px 20px;
+      background-color: #f78da7;
+      border: none;
+      border-radius: 40px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 10px 5px;
+      transition: all 0.3s ease;
+    }
+    .btn:hover {
+      background-color: #ff4d6d;
+    }
+    select, input[type="text"], input[type="time"], input[type="date"] {
+      padding: 10px;
+      border: 2px solid #ccc;
+      border-radius: 12px;
+      margin-top: 10px;
+      display: block;
+    }
+    .product-box {
+      border: 2px solid #ddd;
+      border-radius: 20px;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      background-color: #fff5f5;
+    }
+    .product-box img {
+      width: 100px;
+      height: auto;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .transfer-options {
+      display: none;
+    }
+    #productImage {
+      max-width: 150px;
+      display: block;
+      margin: 10px 0;
+    }
+    .status-btn {
+      padding: 5px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      border: none;
+      font-weight: bold;
+      color: white;
+    }
+    .pendiente {
+      background-color: orange;
+    }
+    .entregado {
+      background-color: green;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="page active" id="page1">
+  <h2>Selecciona tu producto</h2>
+  <div class="product-box">
+    <img src="vape1.jpg" alt="Vape 1" />
+    <h3>Iplay 3h</h3>
+    <label>Sabor:</label>
+    <select id="sabor1"><option>Sandía</option><option>Mango</option><option>Uva</option></select>
+    <p>Hits: 8000</p>
+    <button class="btn" onclick="selectProduct('Vape 1', document.getElementById('sabor1').value, 'vape1.jpg')">Seleccionar</button>
+  </div>
+  <div class="product-box">
+    <img src="vape2.jpg" alt="Vape 2" />
+    <h3>Vape 2</h3>
+    <label>Sabor:</label>
+    <select id="sabor2"><option>Fresa</option><option>Blueberry</option><option>Manzana</option></select>
+    <p>Hits: 8000</p>
+    <button class="btn" onclick="selectProduct('Vape 2', document.getElementById('sabor2').value, 'vape2.jpg')">Seleccionar</button>
+  </div>
+  <div class="product-box">
+    <img src="vape3.jpg" alt="Vape 3" />
+    <h3>Vape 3</h3>
+    <label>Sabor:</label>
+    <select id="sabor3"><option>Limón</option><option>Piña</option><option>Melón</option></select>
+    <p>Hits: 8000</p>
+    <button class="btn" onclick="selectProduct('Vape 3', document.getElementById('sabor3').value, 'vape3.jpg')">Seleccionar</button>
+  </div>
+</div>
+
+<div class="page" id="page2">
+  <h2>Datos de entrega y pago</h2>
+  <label>Hora de entrega:</label>
+  <input type="time" id="hora" />
+  <label>Día de entrega:</label>
+  <input type="date" id="dia" />
+  <label>Lugar de entrega:</label>
+  <select id="lugar">
+    <option>La Raza</option><option>Metro Hidalgo</option>
+    <option>Plaza Las Américas</option><option>Paseo Ventura</option><option>Hospital</option>
+  </select>
+  <h3>Método de pago:</h3>
+  <button class="btn" onclick="setPago('Efectivo')">Efectivo</button>
+  <button class="btn" onclick="toggleTransferencia()">Transferencia</button>
+  <div class="transfer-options" id="transferencia">
+    <p><strong>BBVA:</strong> 41523143916190</p>
+    <p><strong>Banco Azteca:</strong> 4027665887615996</p>
+  </div>
+  <button class="btn" onclick="showPage(1)">Regresar</button>
+  <button class="btn" onclick="nextPage()">Continuar</button>
+</div>
+
+<div class="page" id="page3">
+  <h2>Resumen del pedido</h2>
+  <img id="productImage" src="" alt="Producto Seleccionado" />
+  <p id="resumen"></p>
+  <button class="btn" onclick="showPage(2)">Regresar</button>
+  <button class="btn" onclick="storeOrder()">Finalizar Pedido</button>
+</div>
+
+<div class="page" id="adminPage">
+  <h2>Pedidos Registrados</h2>
+  <div id="ordersList"></div>
+</div>
+
+<script>
+  let producto = "", sabor = "", pago = "", total = 250, pedidos = [], imagen = "";
+
+  function selectProduct(p, s, img) {
+    producto = p;
+    sabor = s;
+    imagen = img;
+    showPage(2);
+  }
+
+  function setPago(p) {
+    pago = p;
+  }
+
+  function toggleTransferencia() {
+    const t = document.getElementById("transferencia");
+    t.style.display = t.style.display === "block" ? "none" : "block";
+    pago = "Transferencia";
+  }
+
+  function nextPage() {
+    const hora = document.getElementById("hora").value;
+    const dia = document.getElementById("dia").value;
+    const lugar = document.getElementById("lugar").value;
+    document.getElementById("resumen").innerText =
+      `Producto: ${producto}, Sabor: ${sabor}, Hits: 8000
+` +
+      `Entrega: ${lugar}, ${hora}, ${dia}
+Pago: ${pago}`;
+    document.getElementById("productImage").src = imagen;
+    showPage(3);
+  }
+
+  function storeOrder() {
+    const hora = document.getElementById("hora").value;
+    const dia = document.getElementById("dia").value;
+    const lugar = document.getElementById("lugar").value;
+    const order = { producto, sabor, hits: "8000", lugar, hora, dia, pago, total, imagen, estado: "pendiente" };
+    pedidos.push(order);
+    localStorage.setItem("vpOrders", JSON.stringify(pedidos));
+    alert("Pedido realizado. El día de la entrega, manda mensaje IG: @smile_vp");
+    showPage(1);
+  }
+
+  function showPage(n) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById("page" + n).classList.add("active");
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const userPass = prompt("Introduce la contraseña:");
+      if (userPass === "170401") {
+        document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+        document.getElementById("adminPage").classList.add("active");
+        loadOrders();
+      }
+    }
+  });
+
+  function loadOrders() {
+    const saved = JSON.parse(localStorage.getItem("vpOrders")) || [];
+    pedidos = saved;
+    const list = document.getElementById("ordersList");
+    list.innerHTML = "";
+    saved.forEach((o, i) => {
+      const item = document.createElement("div");
+      item.innerHTML = `
+        <p><strong>Pedido ${i + 1}</strong>: ${o.producto}, ${o.sabor}, ${o.lugar}, ${o.hora}, ${o.dia}, ${o.pago}</p>
+        <button class="status-btn ${o.estado === 'pendiente' ? 'pendiente' : 'entregado'}" onclick="toggleEstado(${i}, this)">
+          ${o.estado === 'pendiente' ? 'Pendiente' : 'Entregado'}
+        </button>
+        <hr/>
+      `;
+      list.appendChild(item);
+    });
+  }
+
+  function toggleEstado(index, btn) {
+    pedidos[index].estado = pedidos[index].estado === "pendiente" ? "entregado" : "pendiente";
+    localStorage.setItem("vpOrders", JSON.stringify(pedidos));
+    btn.className = "status-btn " + (pedidos[index].estado === "pendiente" ? "pendiente" : "entregado");
+    btn.textContent = pedidos[index].estado === "pendiente" ? "Pendiente" : "Entregado";
+  }
+</script>
+</body>
+</html>
